@@ -1,4 +1,4 @@
-# Retail_data_analysis_python_sql
+# Retail Data Analysis
 
 **Python Data Cleaning + SQL Business Insights**  
 
