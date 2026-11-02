@@ -1,43 +1,47 @@
-drop table df_orders
+CREATE DATABASE IF NOT EXISTS orders;
+USE orders;
+DROP TABLE IF EXISTS df_orders;
 
-create table df_orders(
-	[order_id] int primary key,
-	[order_date] date,
-	[ship_mode] varchar(20),
-	[segment] varchar(20),
-	[country] varchar(20),
-	[city] varchar(20),
-	[state] varchar(20),
-	[postal_code] varchar(20),
-	[region] varchar(20),
-	[category] varchar(20),
-	[sub_category] varchar(20),
-	[product_id] varchar(50),
-	[quantity] int,
-	[discount] decimal(7,2),
-	[sales_price] decimal(7,2),
-	[profit] decimal(7,2),
-	[total_sales] decimal(7,2),
-	[total_profit] decimal(7,2))
+create table df_orders
+(
+	order_id int primary key,
+    order_date date,
+    ship_mode varchar(20),
+    segment varchar(20),
+    country varchar(20),
+    city varchar(50),
+    state varchar(50),
+    postal_code varchar(20),
+    region varchar(20),
+    category varchar(20),
+    sub_category varchar(20),
+    product_id varchar(50),
+    quantity int,
+    discount decimal(12,2),
+    sales_price decimal(12,2),
+    profit decimal(12,2),
+    total_sales decimal(18,2),
+    total_profit decimal(18,2)
+);
 
 
 
-select * from df_orders
+select * from df_orders;
 
 
 
--- top 10 revenue generating products
+--  top 10 revenue generating products
 
-select top 10 product_id,SUM(total_sales) as [sum of sales]
+select  product_id, SUM(total_sales) as sum_of_sales
 from df_orders
 group by product_id
-order by [sum of sales] desc
-
+order by sum_of_sales desc
+LIMIT 10;
 
 
 -- top 5 highest selling products from each region
 
-with cte as(select region,product_id, SUM(total_sales) as [sales]
+with cte as(select region,product_id, SUM(total_sales) as sales
 from df_orders
 group by region,product_id)
 
@@ -45,7 +49,7 @@ select * from
 (select
 *, ROW_NUMBER() over(partition by region order by sales desc) as rn
 from cte) A
-where rn<=5
+where rn<=5;
 
 
 
@@ -60,7 +64,7 @@ select month_ ,
 	sum(case when year_=2023 then sales_ else 0 end) as sl_2023
 from cte
 group by month_
-order by month_
+order by month_;
 
 
 
@@ -69,13 +73,13 @@ order by month_
 with cte as(
 select category,year(order_date) as year_,month(order_date) as month_ , sum(total_sales) as sales_ from df_orders
 group by category,year(order_date), month(order_date)
---order by category,year(order_date), month(order_date)
+order by category,year(order_date), month(order_date)
 )
 
 select * from
 (select *, ROW_NUMBER() over(partition by category order by sales_ desc) as rn
 from cte) B
-where rn=1
+where rn=1;
 
 
 
@@ -93,4 +97,5 @@ from cte
 group by sub_category
 )
 
-select top 1 *,(sl_2023-sl_2022) as [profits_increased] from cte2
+select  *,(sl_2023-sl_2022) as profits_increased from cte2
+LIMIT 1;
